@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import scipy.stats
+from sklearn.metrics import regression
+from sklearn.metrics import classification
 
 class HiGrad:
     
@@ -47,7 +49,7 @@ class HiGrad:
         # start
         self.start = np.random.normal(0, 0.01, x.shape[1])
 
-        # Create Split???
+        # Create Split
         self.split = self.createSplit(self.nsteps, self.nsplits, self.nthreads, self.step_ratio, self.n0)
 
         self.ns = self.split['ns']
@@ -190,14 +192,12 @@ class HiGrad:
 
     def score(self, X, y):
         if self.model == "linear":
-            from sklearn.metrics import regression
             y_hat = self.predict(X)['pred']
             y_hat = y_hat.reshape(-1, 1)
             return regression.mean_squared_error(y, y_hat)
         elif self.model == "logistic":
             y = pd.Series(y.reshape(1, -1)[0])
             y = ((y == max(y)).apply(int)*2 - 1).values
-            from sklearn.metrics import classification
             y_hat = self.predict(X, t='response')['pred']
             y_hat = np.where(y_hat > 0.5, 1, -1)
             return classification.accuracy_score(y, y_hat)    
