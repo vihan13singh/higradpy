@@ -8,7 +8,7 @@ Stochastic gradient descent (SGD) is an immensely popular approach for online le
 
 #### Installation
 ```python
-pip install higrad
+pip install higradpy
 ```
 
 #### Reference
