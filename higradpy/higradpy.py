@@ -6,30 +6,30 @@ from sklearn.metrics import classification
 
 class HiGrad:
     
-    def __init__(self, model = 'lm', nsteps = None,
+    def __init__(self, model = 'linear', nsteps = None,
                 nsplits = 2, nthreads = 2,
                 step_ratio = 1, n0 = np.nan, skip = 0,
                 eta = 1/2, alpha = 1/2, burnin = None,
                 start = None, replace = False, track = False):
         
-        self.model = model;
-        self.nsteps = nsteps;
-        self.nsplits = nsplits;
-        self.nthreads = nthreads;
-        self.step_ratio = step_ratio;
-        self.n0 = n0;
-        self.skip = skip;
-        self.eta = eta;
-        self.alpha = alpha;
-        self.burnin = burnin;
-        self.start = start;
-        self.replace = replace;
+        self.model = model
+        if self.model not in ['linear', 'logistic']:
+            raise ValueError('Model Not Supported. Use "linear" or "logistic".')
+        self.nsteps = nsteps
+        self.nsplits = nsplits
+        self.nthreads = nthreads
+        self.step_ratio = step_ratio
+        self.n0 = n0
+        self.skip = skip
+        self.eta = eta
+        self.alpha = alpha
+        self.burnin = burnin
+        self.start = start
+        self.replace = replace
         self.track = track
 
     def fit(self, x, y):
         
-        if self.model not in ['linear', 'logistic']:
-            raise ValueError('Model Not Supported')
         if self.model == 'logistic':
             if len(np.unique(y)) != 2:
                 raise ValueError("response is not a binary variable")
