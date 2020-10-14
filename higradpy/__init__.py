@@ -1,1 +1,1 @@
-from higrapy.higradpy import HiGrad 
+from higradpy.higradpy import HiGrad 
