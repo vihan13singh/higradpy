@@ -1,7 +1,7 @@
 ![logo](https://camo.githubusercontent.com/796826bb3b2df53e9e47da85833adc751f0a415b/68747470733a2f2f75706c6f61642e77696b696d656469612e6f72672f77696b6970656469612f636f6d6d6f6e732f372f37372f54726964656e745f6c6f676f2e737667)
 # HiGradPy
 
-This is the Python package for HiGrad (Hierarchical Incremental Gradient Descent), an algorithm for statistical inference for online learning and stochastic approximation.
+This is the Python package for HiGrad (Hierarchical Incremental Gradient Descent), an algorithm for statistical inference for online learning and stochastic approximation by Weijie Su and Yuancheng Zhu. 
 
 #### Description
 Stochastic gradient descent (SGD) is an immensely popular approach for online learning in settings where data arrives in a stream or data sizes are very large. However, despite an ever-increasing volume of work on SGD, much less is known about the statistical inferential properties of SGD-based predictions. Taking a fully inferential viewpoint, this paper introduces a novel procedure termed HiGrad to conduct statistical inference for online learning, without incurring additional computational cost compared with the vanilla SGD.
@@ -11,6 +11,27 @@ The HiGrad procedure begins by performing SGD iterations for a while and then sp
 #### Installation
 ```python
 pip install higradpy
+```
+
+#### Example
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from higradpy import HiGrad
+
+# Create training data
+X = np.random.normal(0, 1, (100, 3))
+y = X[:,0] + 10
+
+# Initialize HiGrad model object
+model = HiGrad(model='linear')
+
+# Fit HiGrad model
+model.fit(X, y)
+
+# Make target and confidence interval predictions
+y_hat = model.predict(X)
 ```
 
 #### Reference
