@@ -12,6 +12,44 @@ class HiGrad:
                 eta = 1/2, alpha = 1/2, burnin = None,
                 start = None, replace = False, track = False):
         
+        """
+        Parameters
+        ----------
+        model : str
+            Type of model to fit. Currently only linear regression ("lm") and 
+            logistic regression ("logistic") are supported.
+        nsteps : int
+            Total number of steps. This is equivalent to the number of queries
+            made to get a noisy evaluation of the gradient.
+        nsplits : int
+            Number of splits in the HiGrad tree.
+        nthreads : int
+            Numbers of threads each previous thread is split into. Either a number
+            (equal split size throughout) or a vector.
+        step_ratio : array_like
+            Ratio of the lengths of the threads from the two adjacent levels 
+            (the latter one divided by the previous). Either a number (equal
+            ratio throughout) or a vector.
+        n0 : int
+            Length of the 0th-level thread.
+        skip : int
+            Number of steps to skip when estimating the coefficients by averaging.
+        eta : float
+            Constant in front of the step size. See Details for the formula of the
+            step size.
+        alpha : float
+            Exponent of the step size. See Details for the formula of the step size.
+        burnin : int
+            Number of steps as the burn-in period. The burn-in period is not accounted
+            for in the total budget nsteps.
+        start : ndarray
+            Starting values of the coefficients.
+        replace : bool
+            Whether or not to sample the data with replacement.
+        track : bool
+            Whether or not to store the entire path for plotting.
+        """  
+
         self.model = model
         if self.model not in ['linear', 'logistic']:
             raise ValueError('Model Not Supported. Use "linear" or "logistic".')
@@ -29,7 +67,16 @@ class HiGrad:
         self.track = track
 
     def fit(self, x, y):
-        
+
+        """
+        x : array_like
+            Input matrix of features. Each row is an observation vector, and each column
+            is a feature.
+        y : array_like
+            Response variable. Quantitative for model = "lm". For model = "logistic" it
+            should be a factor with two levels.
+        """  
+              
         if self.model == 'logistic':
             if len(np.unique(y)) != 2:
                 raise ValueError("response is not a binary variable")
@@ -78,15 +125,12 @@ class HiGrad:
                 
                 self.start = self.start - self.stepSize(i) * getGradient(self.start, x[self.idx, ], y[self.idx])
                 
-
         # create a matrix that stores stagewise average
         self.theta_avg = np.full((self.B, self.d, self.K+1), np.nan)
         
-
         # set up theta_track for plotting
         if self.track: 
-            self.theta_track = np.full((self.d, 1), start.reshape(-1, 1))
-            
+            self.theta_track = np.full((self.d, 1), start.reshape(-1, 1))    
 
         # zeroth stage
         # theta matrix for the current stage
@@ -144,7 +188,22 @@ class HiGrad:
             self.out['track'] = self.theta_track
 
     def predict(self, x, alpha=0.05, t="link", prediction_interval=False):
-        
+
+        """
+        x : array_like
+            Matrix of new values for x at which predictions are to be made.
+        alpha : float
+            Significance level. The confidence level of the interval is thus 1 - alpha.
+        t : str
+            Type of prediction required. Type "link" gives the linear predictors for
+            "logistic"; for "linear" models it gives the fitted values. Type "response"
+            gives the fitted probabilities for "logistic"; for "linear" type "response"
+            is equivalent to type "link".
+        prediction_interval : bool
+            Indicator of whether prediction intervals should be returned instead of
+            confidence intervals.
+        """
+
         obj = self.out
 
         # Dimension Check
@@ -190,17 +249,26 @@ class HiGrad:
     
         return out
 
-    def score(self, X, y):
+    def score(self, X, y_true):
+        """
+        X : array_like
+            Matrix of values for at which predictions are to be made.
+        y_true : array_like
+            Matrix of true target values.
+        """
         if self.model == "linear":
             y_hat = self.predict(X)['pred']
             y_hat = y_hat.reshape(-1, 1)
-            return regression.mean_squared_error(y, y_hat)
+            return regression.mean_squared_error(y_true, y_hat)
         elif self.model == "logistic":
-            y = pd.Series(y.reshape(1, -1)[0])
-            y = ((y == max(y)).apply(int)*2 - 1).values
+            if len(np.unique(y_true)) != 2:
+                raise ValueError("response is not a binary variable")
+            else:
+                y_true = pd.Series(y_true.reshape(1, -1)[0])
+                y_true = ((y_true == max(y_true)).apply(int)*2 - 1).values
             y_hat = self.predict(X, t='response')['pred']
             y_hat = np.where(y_hat > 0.5, 1, -1)
-            return classification.accuracy_score(y, y_hat)    
+            return classification.accuracy_score(y_true, y_hat)    
     
     def getSigma0(self, ns, Bs, ws=None):
         B = np.prod(Bs)
@@ -227,7 +295,7 @@ class HiGrad:
             Bs = nthreads
 
         if len(Bs) != K:
-            raise CustomError
+            raise CustomError("len(Bs) != K")
 
         step_ratio = np.array(step_ratio)**range(0, K)
         
