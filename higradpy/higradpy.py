@@ -16,8 +16,8 @@ class HiGrad:
         Parameters
         ----------
         model : str
-            Type of model to fit. Currently only linear regression ("lm") and 
-            logistic regression ("logistic") are supported.
+            Type of model to fit. Currently only linear regression ("linear")
+            and logistic regression ("logistic") are supported.
         nsteps : int
             Total number of steps. This is equivalent to the number of queries
             made to get a noisy evaluation of the gradient.
