@@ -13,6 +13,9 @@ class HiGrad:
                 start = None, replace = False, track = False):
         
         """
+        Create a model (linear or logistic) to train using the Hierarchical
+        Incremental Gradient Descent algorithm.
+
         Parameters
         ----------
         model : str
@@ -23,10 +26,10 @@ class HiGrad:
             made to get a noisy evaluation of the gradient.
         nsplits : int
             Number of splits in the HiGrad tree.
-        nthreads : int
+        nthreads : int or array_like
             Numbers of threads each previous thread is split into. Either a number
             (equal split size throughout) or a vector.
-        step_ratio : array_like
+        step_ratio : int or array_like
             Ratio of the lengths of the threads from the two adjacent levels 
             (the latter one divided by the previous). Either a number (equal
             ratio throughout) or a vector.
@@ -69,6 +72,8 @@ class HiGrad:
     def fit(self, x, y):
 
         """
+        Fit the model to given training data using HiGrad.
+
         x : array_like
             Input matrix of features. Each row is an observation vector, and each column
             is a feature.
@@ -190,6 +195,8 @@ class HiGrad:
     def predict(self, x, alpha=0.05, t="link", prediction_interval=False):
 
         """
+        Get model prediction and confidence intervals for given input.
+
         x : array_like
             Matrix of new values for x at which predictions are to be made.
         alpha : float
